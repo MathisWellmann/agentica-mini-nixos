@@ -188,6 +188,7 @@ class AgentRuntime:
         self,
         premise: str = DEFAULT_PREMISE,
         model: Model | Literal["auto"] = "auto",
+        chunk_listener: Callable[[], logging.AgentListener] | None = None,
         **init_ns: Any,
     ) -> Agent:
         """
@@ -224,7 +225,9 @@ class AgentRuntime:
         if self.__cache is not None:
             self.__cache.hook_openai(selected_model.client)
 
-        return Agent(selected_model, premise, listener, agent_id, **init_ns)
+        return Agent(
+            selected_model, premise, listener, agent_id, chunk_listener, **init_ns
+        )
 
     async def __auto_select_model(self, user_prompt: str) -> Model:
         selector_agent = await self.spawn_agent(
@@ -275,7 +278,7 @@ async def spawn(
     # mcp: str | None = None,
     # mode: Literal["code"] = "code",
     model: str = "openai:gpt-4.1",  # default to copy main-agentica, but sonnet-4.5 is reccomended as performs better
-    # listener: Callable[[], AgentListener] | None = DEFAULT_AGENT_LISTENER, # TODO: add listener, for now
+    listener: Callable[[], logging.AgentListener] | None = None,
     # max_tokens: int = 2048,
     # _logging: bool = False,
     # _call_depth: int = 0,
@@ -287,5 +290,6 @@ async def spawn(
     return await local_runtime.spawn_agent(
         premise=premise or DEFAULT_PREMISE,
         model=model_obj,
+        chunk_listener=listener,
         **scope,
     )

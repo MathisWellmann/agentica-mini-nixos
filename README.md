@@ -102,3 +102,31 @@ The first argument to `call` constrains the agent to only return a value of the 
 If the agent deems it's task impossible, it will raise an `AgentError`.
 
 For a more complete example, see `chat.py`.
+
+### Streaming
+
+To stream chunks during an agent's response:
+1. Define a callback function that will be called on every chunk.
+2. Make a logger that calls this callback function.
+3. Make a listener that wraps the logger.
+4. Spawn an agent with a factory which returns this listener.
+
+```python
+# Make the callback
+chunks = []
+async def callback(chunk):
+    print(chunk.content, end="", flush=True)
+
+# Make the logger & wrap it in a listener
+listener = AgentListener(StreamLogger(on_chunk=callback))
+
+# Spawn an agent with this listener
+agent = await spawn(listener=lambda: listener) # default model & premise
+
+# Call the agent
+result = await agent.call(int, "What is the 32nd power of 3?")
+assert result == 3 ** 32
+
+# Intermediate chunks will have been added to the list
+assert len(chunks) > 0
+```

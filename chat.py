@@ -15,7 +15,13 @@ User:
 
 import asyncio
 
+import dotenv
+
 from agentica import AgentError, local_runtime, spawn
+from agentica.logging import AgentListener
+from agentica.logging.loggers.stream_logger import StreamLogger
+
+dotenv.load_dotenv()
 
 RED = "\033[91m"
 GREEN = "\033[92m"
@@ -31,21 +37,29 @@ async def chat():
 
     local_runtime.print_logs(False)
 
-    agent = await spawn(scope={'spawn_agent': local_runtime.spawn_agent})
+    # Stream intermediate "thinking" to console
+    async def on_chunk(chunk):
+        print(chunk, end="", flush=True)
+
+    listener = AgentListener(StreamLogger(on_chunk=on_chunk))
+
+    agent = await spawn(
+        # model="google/gemini-3-pro-preview",
+        # model="anthropic/claude-opus-4.5",
+        # model="x-ai/grok-4.1-fast",
+        scope={"spawn_agent": local_runtime.spawn_agent},
+        listener=lambda: listener,
+    )
 
     while user_input := input(f"\n{PURPLE}User{RESET}: "):
         try:
             # Invoke agent against user prompt
-            result, stream = agent.call_stream(str, user_input)
-
-            # Stream intermediate "thinking" to console
             print(GREY)
-            async for chunk in stream:
-                print(chunk, end="", flush=True)
+            result = await agent.call(str, user_input)
             print(RESET)
 
             # Print final result
-            print(f"\n{GREEN}Agent{RESET}: {await result}")
+            print(f"\n{GREEN}Agent{RESET}: {result}")
 
         except AgentError as agent_error:
             print(f"\n{RED}AgentError: {agent_error.reason}{RESET}")

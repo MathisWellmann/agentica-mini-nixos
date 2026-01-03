@@ -10,6 +10,8 @@ from typing import Any, AsyncIterator, Awaitable, Callable, TypedDict, TypeVar
 
 from openai.types.chat import ChatCompletionMessage, ChatCompletionMessageParam
 
+from agentica import logging
+from agentica.logging.loggers.stream_logger import Chunk
 from agentica.models import Model
 
 from .responder import (
@@ -59,6 +61,7 @@ class Agent:
         premise: str,
         listener: "AgentListener",
         agent_id: int,
+        chunk_listener: Callable[[], logging.AgentListener] | None = None,
         **init_ns: Any,
     ):
         self.__model_selector = model
@@ -68,6 +71,7 @@ class Agent:
         self.__listener = listener
         self.__current_completion_content = None
         self.id = agent_id
+        self.__chunk_listener = chunk_listener
 
         premise += f"\n\n{REPL_EXPLAINER}"
 
@@ -113,8 +117,16 @@ class Agent:
         assert res == 6
         ```
         """
+        # If this agent has a chunk listener, use streaming to populate it gradually
+        on_stream: Callable[[str | None], Awaitable[None]] = NON_FUTURE_FUNCTION
+        if self.__chunk_listener is not None:
+            listener = self.__chunk_listener()
+            on_stream = lambda chunk_content: listener.logger.on_chunk(
+                Chunk(role="agent", content=chunk_content or "")
+            )
+
         return asyncio.create_task(
-            self._call_lazy(agent_output_type, user_prompt, **agent_inputs)
+            self._call_lazy(agent_output_type, user_prompt, on_stream, **agent_inputs)
         )
 
     def call_stream(
