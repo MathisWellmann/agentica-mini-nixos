@@ -11,7 +11,7 @@ from ..agent import Agent
 from ..runtime import local_runtime
 from ..stubs import emit_stubs
 
-F = TypeVar('F', bound=Callable[..., Awaitable[Any]])
+F = TypeVar("F", bound=Callable[..., Awaitable[Any]])
 
 
 def _map_args_to_params(
@@ -25,7 +25,7 @@ def _map_args_to_params(
     Helper function to map positional args and kwargs to parameter names based on function signature.
     """
     param_names = list(sig.parameters.keys())
-    if skip_self and param_names and param_names[0] == 'self':
+    if skip_self and param_names and param_names[0] == "self":
         param_names = param_names[1:]  # Skip 'self' parameter
 
     # Start with extra namespace
@@ -54,7 +54,9 @@ def magic_class(**extra_ns: Any) -> Callable[[type], type]:
             def __init__(self, *args: Any, **kwargs: Any) -> None:
                 # Get constructor signature to map args to parameter names
                 sig = inspect.signature(target_class.__init__)
-                constructor_ns = _map_args_to_params(sig, args, kwargs, extra_ns, skip_self=True)
+                constructor_ns = _map_args_to_params(
+                    sig, args, kwargs, extra_ns, skip_self=True
+                )
                 # constructor_ns[target_class.__name__] = target_class
 
                 # Store initialization parameters for lazy agent creation
@@ -142,7 +144,9 @@ def magic_fn(**extra_ns: Any) -> Callable[[F], F]:
     """
 
     def wrap(fn: F) -> F:
-        assert inspect.iscoroutinefunction(fn), "magic can only be used on coroutine functions"
+        assert inspect.iscoroutinefunction(fn), (
+            "magic can only be used on coroutine functions"
+        )
 
         async def run_agent_lazy(*args: Any, **kwargs: Any) -> Any:
             agent = await local_runtime.spawn_agent()

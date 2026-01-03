@@ -11,7 +11,9 @@ from openai.types.chat import ChatCompletionMessage, ChatCompletionMessageParam
 from .responder import AgentResult, Responder
 
 
-def print_result(result: Union[ChatCompletionMessageParam, AgentResult], test_name: str):
+def print_result(
+    result: Union[ChatCompletionMessageParam, AgentResult], test_name: str
+):
     """Helper function to print test results safely."""
     print(f"{test_name}:")
     if isinstance(result, dict) and "content" in result:
@@ -28,14 +30,17 @@ async def test_show_definition_tags():
     executor = Responder()
 
     # Set up some test variables
-    executor.extend_ns({"test_var": 42, "test_str": "hello world", "test_list": [1, 2, 3]})
+    executor.extend_ns(
+        {"test_var": 42, "test_str": "hello world", "test_list": [1, 2, 3]}
+    )
 
     print("Testing ipython_show_definition tags...")
     print("=" * 50)
 
     # Test 1: Show single variable
     message1 = ChatCompletionMessage(
-        role="assistant", content="<ipython_show_definition>test_var</ipython_show_definition>"
+        role="assistant",
+        content="<ipython_show_definition>test_var</ipython_show_definition>",
     )
 
     result1 = await executor.respond(str, message1)
@@ -51,7 +56,8 @@ async def test_show_definition_tags():
 
     # Test 3: Non-existent variable
     message3 = ChatCompletionMessage(
-        role="assistant", content="<ipython_show_definition>nonexistent</ipython_show_definition>"
+        role="assistant",
+        content="<ipython_show_definition>nonexistent</ipython_show_definition>",
     )
 
     result3 = await executor.respond(str, message3)
@@ -101,7 +107,8 @@ async def test_backward_compatibility():
 
     # Test regular code execution
     message = ChatCompletionMessage(
-        role="assistant", content="<ipython>result = 2 + 3\nAgentResult(result=result)</ipython>"
+        role="assistant",
+        content="<ipython>result = 2 + 3\nAgentResult(result=result)</ipython>",
     )
 
     result = await executor.respond(int, message)

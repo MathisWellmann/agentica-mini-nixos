@@ -12,7 +12,13 @@ from openai.types.chat import ChatCompletionMessage, ChatCompletionMessageParam
 
 from agentica.models import Model
 
-from .responder import EXECUTOR_WARMUP_MESSAGES, REPL_EXPLAINER, AgentError, AgentResult, Responder
+from .responder import (
+    EXECUTOR_WARMUP_MESSAGES,
+    REPL_EXPLAINER,
+    AgentError,
+    AgentResult,
+    Responder,
+)
 from .stubs import clean_type_name, emit_stubs
 
 T = TypeVar("T")
@@ -57,7 +63,7 @@ class Agent:
     ):
         self.__model_selector = model
         self.__responder = Responder()  # could be a remote object
-        self.__responder.extend_ns({'self': self})  # Allows agents to call themselves
+        self.__responder.extend_ns({"self": self})  # Allows agents to call themselves
         self.__chat_history = []
         self.__listener = listener
         self.__current_completion_content = None
@@ -68,17 +74,24 @@ class Agent:
         if len(init_ns) > 0:
             self.__responder.extend_ns(init_ns)
             premise += f"\n\n**Your namespace is pre-populated with the following variables:**\n\n{
-                "\n\n".join(self.__responder.get_namespace_definitions(var) for var in init_ns)
+                '\n\n'.join(
+                    self.__responder.get_namespace_definitions(var) for var in init_ns
+                )
             }"
 
-        initial_messages = [{"role": "system", "content": premise}, *EXECUTOR_WARMUP_MESSAGES]
+        initial_messages = [
+            {"role": "system", "content": premise},
+            *EXECUTOR_WARMUP_MESSAGES,
+        ]
         if LOG_INITIAL_MESSAGES:
             for message in initial_messages:
                 self.__listener.message_added(message)
         self.__chat_history.extend(initial_messages)
 
     def __add_messages(
-        self, *messages: ChatCompletionMessageParam, inference_stats: InferenceStats | None = None
+        self,
+        *messages: ChatCompletionMessageParam,
+        inference_stats: InferenceStats | None = None,
     ) -> None:
         for message in messages:
             self.__listener.message_added(message, inference_stats)
@@ -100,10 +113,12 @@ class Agent:
         assert res == 6
         ```
         """
-        return asyncio.create_task(self._call_lazy(agent_output_type, user_prompt, **agent_inputs))
+        return asyncio.create_task(
+            self._call_lazy(agent_output_type, user_prompt, **agent_inputs)
+        )
 
     def call_stream(
-        self,  agent_output_type: type[T] | Any, user_prompt: str, **agent_inputs: Any
+        self, agent_output_type: type[T] | Any, user_prompt: str, **agent_inputs: Any
     ) -> tuple[Awaitable[T], AsyncIterator[str]]:
         """
         Just like `call`, but also returns an async iterator of the agent's internal textual output.
@@ -173,7 +188,9 @@ class Agent:
                 stream=False,
             )  # listener makes things vibrant, can be swapped out for pure json
 
-            self.__current_completion_content = response.choices[0].message.content or ""
+            self.__current_completion_content = (
+                response.choices[0].message.content or ""
+            )
             input_tokens = response.usage.prompt_tokens if response.usage else None
             output_tokens = response.usage.completion_tokens if response.usage else None
             full_content = response.choices[0].message.content or ""
@@ -214,9 +231,7 @@ class Agent:
         # Add python variables to that chat
         if len(agent_inputs) > 0:
             stubs, context = emit_stubs(agent_inputs)
-            user_prompt += (
-                f"\n\nThe following variables have been added to your namespace:\n\n{stubs}"
-            )
+            user_prompt += f"\n\nThe following variables have been added to your namespace:\n\n{stubs}"
             self.__responder.extend_ns(agent_inputs)
 
         self.__add_messages({"role": "user", "content": user_prompt})
@@ -229,14 +244,16 @@ class Agent:
                 # EXECUTION
                 try:
                     # Create a message object from the content
-                    message = ChatCompletionMessage(role="assistant", content=full_content)
+                    message = ChatCompletionMessage(
+                        role="assistant", content=full_content
+                    )
                     match await self.__responder.respond(agent_output_type, message):
                         case AgentResult(result=result):
                             self.__listener.call_exit(result)
                             return result  # breaks out of the execution loop
                         case executor_message:
                             assert "content" in executor_message and isinstance(
-                                executor_message['content'], str
+                                executor_message["content"], str
                             ), "Responder didn't return any content"
                             await on_stream(
                                 f"\n<ipython_result>{executor_message['content']}</ipython_result>\n\n"
@@ -271,7 +288,7 @@ class Agent:
         return self.__chat_history
 
 
-def find_current_agent() -> 'Agent | None':
+def find_current_agent() -> "Agent | None":
     """Find the currently executing agent in the call stack."""
     import inspect
 
@@ -281,10 +298,10 @@ def find_current_agent() -> 'Agent | None':
     while cur_frame is not None:
         if (
             cur_frame.f_code == call_code
-            and 'self' in cur_frame.f_locals
-            and isinstance(cur_frame.f_locals['self'], Agent)
+            and "self" in cur_frame.f_locals
+            and isinstance(cur_frame.f_locals["self"], Agent)
         ):
-            return cur_frame.f_locals['self']
+            return cur_frame.f_locals["self"]
         cur_frame = cur_frame.f_back
 
     return None
@@ -318,7 +335,9 @@ class AgentListener:
         self.__parent_agent_id = parent_agent_id
 
     def message_added(
-        self, message: ChatCompletionMessageParam, inference_stats: InferenceStats | None = None
+        self,
+        message: ChatCompletionMessageParam,
+        inference_stats: InferenceStats | None = None,
     ) -> None:
         """Write a message to the log file in XML format."""
         assert "content" in message, "Message must have content"
@@ -330,8 +349,10 @@ class AgentListener:
 
         attr_str = " ".join(f'{k}="{v}"' for k, v in attrs.items() if k != "content")
 
-        with open(self.__file_path, 'a') as f:
-            f.write(f"<message {attr_str}>\n\t{content.replace('\n', '\n\t')}\n</message>\n")
+        with open(self.__file_path, "a") as f:
+            f.write(
+                f"<message {attr_str}>\n\t{content.replace('\n', '\n\t')}\n</message>\n"
+            )
 
     def call_enter(self, user_prompt: str) -> None:
         current_name = make_name(self.__agent_id)

@@ -9,6 +9,7 @@ from typing import Any, Callable, Literal
 
 from dotenv import load_dotenv
 
+from agentica import logging
 from agentica.cache import RequestCache, local_cache
 
 from . import models
@@ -38,7 +39,7 @@ GREY = "\033[90m"
 # Global list to track names and their assigned colors
 _name_registry: list[str] = []
 
-DEFAULT_PREMISE = f"""
+DEFAULT_PREMISE = """
 You are a helpful assistant which answers user queries and solves tasks from the user.
 
 In solving these tasks you will typically run a series of python snippets, which is the primary way you interact with the world and your user.
@@ -69,7 +70,7 @@ def _colorize_names(text: str) -> str:
         return f"{color}{name}{RESET}"
 
     # Regex to match "User" or "Agent X" (where X is a number)
-    pattern = r'(?:User|Agent \d+)\b'
+    pattern = r"(?:User|Agent \d+)\b"
     return re.sub(pattern, replace_name, text)
 
 
@@ -106,10 +107,10 @@ class RuntimeListener:
                 print(_colorize_names(log_line))
 
             # Remove all ansi escape codes
-            log_line = re.sub(r'\x1b\[[0-9;]*[mK]', '', log_line)
+            log_line = re.sub(r"\x1b\[[0-9;]*[mK]", "", log_line)
 
             # Write to file
-            with open(self.__file_path, 'a') as f:
+            with open(self.__file_path, "a") as f:
                 f.write(f"{log_line}\n")
 
     async def agent_spawned(self, agent_id: int) -> AgentListener:
@@ -118,9 +119,7 @@ class RuntimeListener:
 
         # Log the agent spawn with full path to its log file
         agent_log_file = Path("logs_agent") / f"agent_{agent_id}.log"
-        spawn_message = (
-            f"{GREY}Spawned{RESET} Agent {agent_id} {GREY}({agent_log_file.absolute()}){RESET}"
-        )
+        spawn_message = f"{GREY}Spawned{RESET} Agent {agent_id} {GREY}({agent_log_file.absolute()}){RESET}"
         self.__log_queue.put_nowait(spawn_message)
 
         # Try to detect if we're currently executing inside an agent
@@ -258,14 +257,15 @@ class AgentRuntime:
 local_runtime = AgentRuntime(models.OPENROUTER_QWEN3, local_cache)
 
 type ModelStrings = Literal[
-    'openai:gpt-3.5-turbo',
-    'openai:gpt-4o',
-    'openai:gpt-4.1',
-    'openai:gpt-5',
-    'anthropic:claude-sonnet-4',
-    'anthropic:claude-opus-4.1',
-    'anthropic:claude-sonnet-4.5',
+    "openai:gpt-3.5-turbo",
+    "openai:gpt-4o",
+    "openai:gpt-4.1",
+    "openai:gpt-5",
+    "anthropic:claude-sonnet-4",
+    "anthropic:claude-opus-4.1",
+    "anthropic:claude-sonnet-4.5",
 ]
+
 
 async def spawn(
     premise: str | None = None,
@@ -274,8 +274,8 @@ async def spawn(
     # system: str | None = None,
     # mcp: str | None = None,
     # mode: Literal["code"] = "code",
-    model: str = "openai:gpt-4.1", # default to copy main-agentica, but sonnet-4.5 is reccomended as performs better
-    # listener: Callable[[], AgentListener] | None = DEFAULT_AGENT_LISTENER, # TODO: add listener, for now 
+    model: str = "openai:gpt-4.1",  # default to copy main-agentica, but sonnet-4.5 is reccomended as performs better
+    # listener: Callable[[], AgentListener] | None = DEFAULT_AGENT_LISTENER, # TODO: add listener, for now
     # max_tokens: int = 2048,
     # _logging: bool = False,
     # _call_depth: int = 0,

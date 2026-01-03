@@ -129,7 +129,9 @@ class TestStubGeneration(unittest.TestCase):
     def test_class_with_private_methods(self):
         """Test that private methods are hidden but public methods are shown."""
         context = {}
-        result = _stub_for_value("ClassWithPrivateMethods", ClassWithPrivateMethods, context)
+        result = _stub_for_value(
+            "ClassWithPrivateMethods", ClassWithPrivateMethods, context
+        )
         expected = '''class ClassWithPrivateMethods:
     """Class with private methods that should be hidden."""
     def public_method(self) -> NoneType: ...'''

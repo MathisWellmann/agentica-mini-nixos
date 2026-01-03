@@ -46,7 +46,10 @@ REPL_EXPLAINER = (
 )
 
 EXECUTOR_WARMUP_MESSAGES: list[ChatCompletionMessageParam] = [
-    {"role": "user", "content": "As a warmup, tell me if ~/secret.md contains any numbers."},
+    {
+        "role": "user",
+        "content": "As a warmup, tell me if ~/secret.md contains any numbers.",
+    },
     {
         "role": "assistant",
         "content": dedent("""
@@ -199,7 +202,7 @@ class Responder:
             #         """)
             #     )
 
-            if re.search(r'\bdir\s*\(|\bhelp\s*\(', code):
+            if re.search(r"\bdir\s*\(|\bhelp\s*\(", code):
                 return executor_message(
                     dedent("""
                     No code was executed.

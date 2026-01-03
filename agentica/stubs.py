@@ -28,7 +28,7 @@ def _format_docstring(obj: object, indent: str = "") -> str:
             return ""
 
         # Split into lines and add proper indentation
-        lines = docstring.split('\n')
+        lines = docstring.split("\n")
         # First line goes on the same line as the triple quotes
         if len(lines) == 1:
             return f'{indent}"""{lines[0]}"""'
@@ -37,26 +37,26 @@ def _format_docstring(obj: object, indent: str = "") -> str:
         formatted_lines = [f'{indent}"""{lines[0]}']
         for line in lines[1:]:
             # Add indent to each subsequent line
-            formatted_lines.append(f'{indent}{line}' if line.strip() else f'{indent}')
+            formatted_lines.append(f"{indent}{line}" if line.strip() else f"{indent}")
         formatted_lines.append(f'{indent}"""')
-        return '\n'.join(formatted_lines)
+        return "\n".join(formatted_lines)
     except Exception:
         return ""
 
 
 _BUILTIN_TYPES = frozenset(
-    {'int', 'str', 'float', 'bool', 'dict', 'list', 'tuple', 'set', 'bytes', 'NoneType'}
+    {"int", "str", "float", "bool", "dict", "list", "tuple", "set", "bytes", "NoneType"}
 )
 
 
 def clean_type_name(type_obj: object, context: dict[str, _t.Any]) -> str:
     """Get a clean, readable type name from a type object and add it to context."""
     # Handle generic types like List[str], Dict[str, int]
-    origin = getattr(type_obj, '__origin__', None)
+    origin = getattr(type_obj, "__origin__", None)
     if origin is not None:
         # For parameterized generics, we want the base type (List, not List[str])
-        if hasattr(type_obj, '_name') and getattr(type_obj, '_name'):
-            name = getattr(type_obj, '_name')
+        if hasattr(type_obj, "_name") and getattr(type_obj, "_name"):
+            name = getattr(type_obj, "_name")
             # Try to get the actual typing class
             try:
                 import typing as typing_mod
@@ -68,7 +68,7 @@ def clean_type_name(type_obj: object, context: dict[str, _t.Any]) -> str:
                 context[name] = type_obj
 
         # Also process any type arguments
-        args = getattr(type_obj, '__args__', ())
+        args = getattr(type_obj, "__args__", ())
         for arg in args:
             clean_type_name(arg, context)
 
@@ -76,8 +76,8 @@ def clean_type_name(type_obj: object, context: dict[str, _t.Any]) -> str:
         return repr(type_obj).replace("typing.", "")
 
     # Handle built-in types
-    if hasattr(type_obj, '__name__'):
-        name = getattr(type_obj, '__name__', '')
+    if hasattr(type_obj, "__name__"):
+        name = getattr(type_obj, "__name__", "")
         if name in _BUILTIN_TYPES:
             return name
         else:
@@ -86,8 +86,8 @@ def clean_type_name(type_obj: object, context: dict[str, _t.Any]) -> str:
             return name
 
     # Handle typing constructs like Optional (when not parameterized)
-    if hasattr(type_obj, '_name'):
-        name = getattr(type_obj, '_name', None)
+    if hasattr(type_obj, "_name"):
+        name = getattr(type_obj, "_name", None)
         if name and name not in _BUILTIN_TYPES:
             try:
                 import typing as typing_mod
@@ -178,8 +178,8 @@ def _format_function_stub(
             params.append(f"{p.name}{ann_str}{default}")
 
         ret = ""
-        if 'return' in ann:
-            ret_obj = ann['return']
+        if "return" in ann:
+            ret_obj = ann["return"]
             ret_repr = clean_type_name(ret_obj, context)
             ret = f" -> {ret_repr}"
 
@@ -219,7 +219,9 @@ def _stub_for_value(name: str, val: object, context: dict[str, _t.Any]) -> str:
             try:
                 if inspect.isfunction(attr_val) or inspect.ismethod(attr_val):
                     # Use the shared function stub formatter with indentation
-                    method_stub = _format_function_stub(attr_name, attr_val, context, "    ")
+                    method_stub = _format_function_stub(
+                        attr_name, attr_val, context, "    "
+                    )
                     members.append(method_stub)
                 elif not callable(attr_val):
                     # Class attribute
@@ -228,7 +230,7 @@ def _stub_for_value(name: str, val: object, context: dict[str, _t.Any]) -> str:
                     members.append(f"    {attr_name}: {type_name} = {repr_val}")
             except Exception:
                 # Fallback for problematic attributes
-                type_name = getattr(type(attr_val), '__name__', 'object')
+                type_name = getattr(type(attr_val), "__name__", "object")
                 members.append(f"    {attr_name}: {type_name}")
 
         if members:

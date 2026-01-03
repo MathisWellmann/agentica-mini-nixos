@@ -26,8 +26,8 @@ class CacheHandler:
         self.db: aiosqlite.Connection | None = None
 
         # Read FILE_CACHE environment variable
-        self.file_cache_mode = os.environ.get('FILE_CACHE', '').lower()
-        if self.file_cache_mode not in ('', 'read', 'write'):
+        self.file_cache_mode = os.environ.get("FILE_CACHE", "").lower()
+        if self.file_cache_mode not in ("", "read", "write"):
             raise ValueError(
                 f"Invalid FILE_CACHE value: {self.file_cache_mode}. Must be '', 'read', or 'write'"
             )
@@ -66,14 +66,16 @@ class CacheHandler:
         request_data = {
             "method": method,
             "path": path,
-            "body": body.decode('utf-8', errors='ignore') if body else "",
+            "body": body.decode("utf-8", errors="ignore") if body else "",
             "redirect_url": redirect_url,
         }
         request_str = json.dumps(request_data, sort_keys=True)
         # print("CACHE KEY", request_str)
         return hashlib.sha256(request_str.encode()).hexdigest(), request_str
 
-    async def _get_cached_response(self, cache_key: str) -> tuple[int, dict, bytes] | None:
+    async def _get_cached_response(
+        self, cache_key: str
+    ) -> tuple[int, dict, bytes] | None:
         """Get cached response from database"""
         if self.db is None:
             return None
@@ -90,7 +92,9 @@ class CacheHandler:
             return status_code, headers, body
         return None
 
-    async def _save_response(self, cache_key: str, status_code: int, headers: dict, body: bytes):
+    async def _save_response(
+        self, cache_key: str, status_code: int, headers: dict, body: bytes
+    ):
         """Save response to database"""
         if self.db is None:
             return
@@ -106,7 +110,9 @@ class CacheHandler:
         """Get the file path for a cache key"""
         return FILE_CACHE_DIR / f"{cache_key}.json"
 
-    async def _get_file_cached_response(self, cache_key: str) -> tuple[int, dict, bytes] | None:
+    async def _get_file_cached_response(
+        self, cache_key: str
+    ) -> tuple[int, dict, bytes] | None:
         """Get cached response from file cache"""
         file_path = self._get_file_cache_path(cache_key)
 
@@ -114,15 +120,15 @@ class CacheHandler:
             return None
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 cache_data = json.load(f)
 
-            status_code = cache_data['status_code']
-            headers = cache_data['headers']
+            status_code = cache_data["status_code"]
+            headers = cache_data["headers"]
             # Body is stored as base64 encoded string
             import base64
 
-            body = base64.b64decode(cache_data['body'])
+            body = base64.b64decode(cache_data["body"])
 
             return status_code, headers, body
         except (json.JSONDecodeError, KeyError, ValueError) as e:
@@ -142,14 +148,14 @@ class CacheHandler:
         import base64
 
         cache_data = {
-            'status_code': status_code,
-            'headers': headers,
-            'body': base64.b64encode(body).decode('utf-8'),
-            'timestamp': time.time(),
+            "status_code": status_code,
+            "headers": headers,
+            "body": base64.b64encode(body).decode("utf-8"),
+            "timestamp": time.time(),
         }
 
         try:
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, indent=2)
         except Exception as e:
             print(f"Error writing file cache {file_path}: {e}")
@@ -169,7 +175,9 @@ class CacheHandler:
 
         # Remove host header and cache redirect header to avoid conflicts
         forward_headers = {
-            k: v for k, v in headers.items() if k.lower() not in ('host', 'x-cache-redirect-to')
+            k: v
+            for k, v in headers.items()
+            if k.lower() not in ("host", "x-cache-redirect-to")
         }
 
         collected_body = bytearray()
@@ -185,7 +193,8 @@ class CacheHandler:
                 clean_headers = {
                     k: v
                     for k, v in response.headers.items()
-                    if k.lower() not in ('transfer-encoding', 'content-length', 'content-encoding')
+                    if k.lower()
+                    not in ("transfer-encoding", "content-length", "content-encoding")
                 }
 
                 # Set headers on stream response
@@ -202,10 +211,12 @@ class CacheHandler:
 
                 return response.status, dict(response.headers), bytes(collected_body)
 
-    async def handle_request(self, request: web.Request) -> web.Response | web.StreamResponse:
+    async def handle_request(
+        self, request: web.Request
+    ) -> web.Response | web.StreamResponse:
         """Handle incoming HTTP request"""
         # Get redirect URL from header
-        redirect_url = request.headers.get('X-Cache-Redirect-To')
+        redirect_url = request.headers.get("X-Cache-Redirect-To")
         if not redirect_url:
             return web.Response(status=400, text="Missing X-Cache-Redirect-To header")
 
@@ -221,7 +232,7 @@ class CacheHandler:
         headers: dict
         response_body: bytes
 
-        if self.file_cache_mode == 'read':
+        if self.file_cache_mode == "read":
             # READONLY MODE: Must be in file cache
             db_cached = await self._get_file_cached_response(cache_key)
             if db_cached:
@@ -233,15 +244,20 @@ class CacheHandler:
                 clean_headers = {
                     k: v
                     for k, v in headers.items()
-                    if k.lower() not in ('transfer-encoding', 'content-length', 'content-encoding')
+                    if k.lower()
+                    not in ("transfer-encoding", "content-length", "content-encoding")
                 }
 
                 # Set correct content-length for the actual body
-                clean_headers['Content-Length'] = str(len(response_body))
+                clean_headers["Content-Length"] = str(len(response_body))
 
-                return web.Response(status=status_code, headers=clean_headers, body=response_body)
+                return web.Response(
+                    status=status_code, headers=clean_headers, body=response_body
+                )
             else:
-                message = f"Cache miss in read mode for key: {cache_key}\n\n{cache_key_str}"
+                message = (
+                    f"Cache miss in read mode for key: {cache_key}\n\n{cache_key_str}"
+                )
                 if github_output := os.getenv("GITHUB_OUTPUT"):
                     with open(github_output, "a") as f:
                         f.write(f"{message}\n")  # For github actions
@@ -260,13 +276,16 @@ class CacheHandler:
                 clean_headers = {
                     k: v
                     for k, v in headers.items()
-                    if k.lower() not in ('transfer-encoding', 'content-length', 'content-encoding')
+                    if k.lower()
+                    not in ("transfer-encoding", "content-length", "content-encoding")
                 }
 
                 # Set correct content-length for the actual body
-                clean_headers['Content-Length'] = str(len(response_body))
+                clean_headers["Content-Length"] = str(len(response_body))
 
-                return web.Response(status=status_code, headers=clean_headers, body=response_body)
+                return web.Response(
+                    status=status_code, headers=clean_headers, body=response_body
+                )
             else:
                 # print(f"CACHE MISS: {cache_key}")
                 # Forward request with streaming and cache response
@@ -283,9 +302,11 @@ class CacheHandler:
 
                 # Cache the response after streaming
                 if 200 <= status_code < 300:
-                    await self._save_response(cache_key, status_code, headers, response_body)
+                    await self._save_response(
+                        cache_key, status_code, headers, response_body
+                    )
 
-                    if self.file_cache_mode == 'write':
+                    if self.file_cache_mode == "write":
                         # WRITE MODE: Save result to file cache
                         await self._save_file_cached_response(
                             cache_key, status_code, headers, response_body
@@ -305,10 +326,10 @@ async def create_cache_app(cache_db: Path) -> web.Application:
     async def handle_all_methods(request):
         return await cache_handler.handle_request(request)
 
-    app.router.add_route('*', '/{path:.*}', handle_all_methods)
+    app.router.add_route("*", "/{path:.*}", handle_all_methods)
 
     # Store handler reference for cleanup
-    app['cache_handler'] = cache_handler
+    app["cache_handler"] = cache_handler
 
     return app
 
@@ -320,7 +341,7 @@ async def cache_server_async(port: int, cache_db: Path):
     runner = web.AppRunner(app)
     await runner.setup()
 
-    site = web.TCPSite(runner, 'localhost', port)
+    site = web.TCPSite(runner, "localhost", port)
     await site.start()
 
     try:
@@ -328,7 +349,7 @@ async def cache_server_async(port: int, cache_db: Path):
         while True:
             await asyncio.sleep(1)
     finally:
-        await app['cache_handler'].close()
+        await app["cache_handler"].close()
         await runner.cleanup()
 
 
@@ -344,7 +365,7 @@ def _wait_for_server(port: int, timeout: float = 5.0):
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.settimeout(0.1)
-                result = s.connect_ex(('localhost', port))
+                result = s.connect_ex(("localhost", port))
                 if result == 0:  # Connection successful
                     return
         except (ConnectionRefusedError, OSError):
@@ -371,16 +392,20 @@ class RequestCache:
 
         # Find a free port by binding to port 0
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(('', 0))
+            s.bind(("", 0))
             self.__port = s.getsockname()[1]
 
         # Start the server in a subprocess using multiprocessing
-        process = multiprocessing.Process(target=cache_server, args=(self.__port, self.__cache_db))
+        process = multiprocessing.Process(
+            target=cache_server, args=(self.__port, self.__cache_db)
+        )
         process.daemon = True  # Dies when parent process dies
         process.start()
 
         # Wait for the server to start
-        assert self.__port is not None, "If port not set, should've already thrown exception"
+        assert self.__port is not None, (
+            "If port not set, should've already thrown exception"
+        )
         _wait_for_server(self.__port)
 
     def hook_openai(self, client: AsyncOpenAI):
@@ -391,8 +416,11 @@ class RequestCache:
             assert client.base_url == f"http://localhost:{self.__port}/"
             return  # Makes the hook idempotent
 
-        assert isinstance(client._custom_headers, dict), "Generic mappings not supported"
+        assert isinstance(client._custom_headers, dict), (
+            "Generic mappings not supported"
+        )
         client._custom_headers[REDIRECT_HEADER] = str(client.base_url)
         client.base_url = f"http://localhost:{self.__port}/"
+
 
 local_cache = RequestCache(Path("cache.sqlite"))
