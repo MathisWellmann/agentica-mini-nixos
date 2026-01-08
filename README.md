@@ -1,4 +1,4 @@
-# Simple Agentica
+# Agentica Mini
 
 A simplified version of [Agentica](https://agentica.symbolica.ai), which runs all agents locally.
 
@@ -13,7 +13,7 @@ Until this repo is published on PyPI, the easiest way to install it is to clone 
 **Step 1:** Clone this repo into your repo as a submodule:
 
 ```bash
-git submodule add git@github.com:symbolica-ai/simple-agentica.git simple-agentica
+git submodule add git@github.com:symbolica-ai/agentica-mini.git agentica-mini
 ```
 
 **Step 2:** Add it as a dependency (choose one):
@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-agentica = { path = "./simple-agentica", editable = true }
+agentica = { path = "./agentica-mini", editable = true }
 ```
 
 ### Option B: Pip
@@ -38,12 +38,12 @@ agentica = { path = "./simple-agentica", editable = true }
 Install the dependency in editable mode:
 
 ```bash
-pip install -e ./simple-agentica
+pip install -e ./agentica-mini
 ```
 
 ## Environment variables
 
-Simple Agentica uses OpenRouter for inference, although it could be easily modified to use other providers (PR's welcome!). You'll need to set the `OPENROUTER_API_KEY` environment variable to your OpenRouter API key.
+Agentica uses OpenRouter for inference, although it could be easily modified to use  Miniother providers (PR's welcome!). You'll need to set the `OPENROUTER_API_KEY` environment variable to your OpenRouter API key.
 
 It is reccomended to put environment variables in a `.env` file that it is not committed to git.
 
