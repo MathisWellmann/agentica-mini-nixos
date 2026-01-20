@@ -17,6 +17,11 @@
           inherit system;
         };
 
+        deps = with pkgs; [
+          cacert # for SSL certificates.
+          pkg-config
+          openssl
+        ];
         nix_tools = with pkgs; [
           alejandra # Nix code formatter.
           statix # Nix static code checker
@@ -29,17 +34,25 @@
         ];
       in {
         # Build packages with `nix build .#inference` for example.
-        packages = { };
+        packages = {};
 
         # Enter reproducible development shell with `nix develop`
         devShells = {
           default = pkgs.mkShell {
-            buildInputs = nix_tools ++ python_tools;
+            buildInputs = deps ++ nix_tools ++ python_tools;
+            SSL_CERT_FILE = "/etc/ssl/certs/ca-bundle.crt";
           };
         };
 
         # Apps can be run with `nix run`
-        apps = {};
+        apps = rec {
+          default = chat;
+          chat = flake-utils.lib.mkApp {
+            drv = pkgs.writeShellScriptBin "chat" ''
+              nix develop --command uv run python -m chat
+            '';
+          };
+        };
       }
     );
 }

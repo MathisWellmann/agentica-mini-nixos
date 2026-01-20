@@ -17,7 +17,7 @@ from aiohttp import web
 from openai import AsyncOpenAI
 
 REDIRECT_HEADER = "X-Cache-Redirect-To"
-FILE_CACHE_DIR = Path(__file__).parent / "tests/file_cache"
+FILE_CACHE_DIR = Path(__file__).parent / "file_cache"
 
 
 class CacheHandler:
