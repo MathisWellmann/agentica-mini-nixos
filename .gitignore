@@ -5,3 +5,8 @@ cache.sqlite
 
 **/.env
 **/*.gitignore.*
+
+# Nix build artifact symlink
+result
+# Nix VM volume
+agentica.qcow2
