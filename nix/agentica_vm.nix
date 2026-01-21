@@ -10,7 +10,7 @@ let
       loader.systemd-boot.enable = true;
       loader.efi.canTouchEfiVariables = true;
       initrd.systemd.enable = true;
-      supportedFilesystems = [ "9p" "9p2000" ];
+      supportedFilesystems = ["9p" "9p2000"];
     };
 
     services = {
@@ -51,8 +51,10 @@ let
       diskSize = 2048;
       # This enables port forwarding
       vmVariant.virtualisation.qemu.options = [
-        "-netdev" "user,id=net0,hostfwd=tcp::${toString port}-:${toString port}"
-        "-device" "virtio-net-pci,netdev=net0"
+        "-netdev"
+        "user,id=net0,hostfwd=tcp::${toString port}-:${toString port}"
+        "-device"
+        "virtio-net-pci,netdev=net0"
         "-virtfs local,path=${toString ./../hostshare},mount_tag=hostshare,security_model=mapped-xattr,id=hostshare"
       ];
     };
