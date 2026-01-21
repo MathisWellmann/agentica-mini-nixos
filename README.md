@@ -1,18 +1,19 @@
-Agentica Mini Nixos Showcase
+Agentica Mini NixOS Showcase
 ============================
 
 > [!IMPORTANT]
 > This is a work-in-progress prototype and only public to make it easy to talk
-> about.
+> about. Expect nothing to work.
 
 Use [`agentica`] to fully control a Linux system including:
 
+ -  Provide a python repl chat interface for instructing the Agent to do things.
  -  Installing and importing arbitrary python packages, including ones with system
     dependencies.
  -  Installing arbitrary nix packages in the system, for the agent to use, e.g
     `neofetch`
  -  Run systemd services, so the agent can use
-    them in the native python environment.
+    them in the native python environment, e.g.: `redis`, `postgresql`
  -  Expose the systemd services from the VM, so users can interact with those
     services.
  -  Run arbitrary shell commands to make this all work.
