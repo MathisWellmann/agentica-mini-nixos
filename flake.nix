@@ -57,6 +57,8 @@
           default = chat;
           chat = flake-utils.lib.mkApp {
             drv = pkgs.writeShellScriptBin "chat" ''
+              git submodule add https://github.com/symbolica-ai/agentica-mini.git agentica-mini
+              mkdir -p ./agentica-mini/agentica/tests/file_cache
               nix develop --command uv run python -m chat
             '';
           };

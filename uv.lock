@@ -5,8 +5,35 @@ requires-python = ">=3.13"
 [[package]]
 name = "agentica"
 version = "0.1.0"
+source = { editable = "agentica-mini" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "aiosqlite" },
+    { name = "ipython" },
+    { name = "openai" },
+    { name = "python-dotenv" },
+    { name = "typeguard" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiohttp", specifier = ">=3.12.15" },
+    { name = "aiosqlite", specifier = ">=0.21.0" },
+    { name = "ipython" },
+    { name = "openai" },
+    { name = "python-dotenv", specifier = ">=1.1.1" },
+    { name = "typeguard", specifier = ">=4.4.4" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pyright", specifier = ">=1.1.403" }]
+
+[[package]]
+name = "agentica-mini-nixos"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "agentica" },
     { name = "aiohttp" },
     { name = "aiosqlite" },
     { name = "ipython" },
@@ -22,6 +49,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "agentica", editable = "agentica-mini" },
     { name = "aiohttp", specifier = ">=3.12.15" },
     { name = "aiosqlite", specifier = ">=0.21.0" },
     { name = "ipython" },
