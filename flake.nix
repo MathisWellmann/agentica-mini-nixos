@@ -40,7 +40,10 @@
         devShells = {
           default = pkgs.mkShell {
             buildInputs = deps ++ nix_tools ++ python_tools;
-            SSL_CERT_FILE = "/etc/ssl/certs/ca-bundle.crt";
+            shellHook = ''
+              export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+              export NIX_SSL_CERT_FILE="$SSL_CERT_FILE"
+            '';
           };
         };
 
