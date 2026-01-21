@@ -10,3 +10,4 @@ cache.sqlite
 result
 # Nix VM volume
 agentica.qcow2
+/.direnv
