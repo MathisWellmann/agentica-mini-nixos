@@ -4,12 +4,14 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    hongdown.url = "github:dahlia/hongdown";
   };
 
   outputs = {
     self,
     nixpkgs,
     flake-utils,
+    hongdown,
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
@@ -32,6 +34,9 @@
           uv
           ruff
         ];
+        other_tools = [
+          hongdown.packages.${system}.hongdown # Markdown formatter, will soon be upstream in nixpkgs <https://github.com/NixOS/nixpkgs/pull/478761>
+        ];
       in {
         # Build packages with `nix build .#inference` for example.
         packages = {};
@@ -39,7 +44,7 @@
         # Enter reproducible development shell with `nix develop`
         devShells = {
           default = pkgs.mkShell {
-            buildInputs = deps ++ nix_tools ++ python_tools;
+            buildInputs = deps ++ nix_tools ++ python_tools ++ other_tools;
             shellHook = ''
               export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
               export NIX_SSL_CERT_FILE="$SSL_CERT_FILE"
