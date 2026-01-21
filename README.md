@@ -1,15 +1,24 @@
 Agentica Mini Nixos Showcase
 ============================
 
-Use `agentica` to fully control a Linux system including:
+> [!IMPORTANT]
+> This is a work-in-progress prototype and only public to make it easy to talk
+> about.
 
- -  Installing and importing arbitrary python packages, including ones with system dependencies.
- -  Installing arbitrary nix packages in the system, for the agent to use, e.g `neofetch`
+Use [`agentica`] to fully control a Linux system including:
+
+ -  Installing and importing arbitrary python packages, including ones with system
+    dependencies.
+ -  Installing arbitrary nix packages in the system, for the agent to use, e.g
+    `neofetch`
  -  Run systemd services, so the agent can use
     them in the native python environment.
- -  Expose the systemd services from the VM, so users can interact with those services.
+ -  Expose the systemd services from the VM, so users can interact with those
+    services.
  -  Run arbitrary shell commands to make this all work.
  -  Isolated in QEMU VM
+
+[`agentica`]: https://www.symbolica.ai/agentica
 
 ### Build with [Nix]
 
@@ -18,6 +27,7 @@ Use `agentica` to fully control a Linux system including:
     ~~~~ shell
     sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
     ~~~~
+
  -  Now simply run it with:
      -  `nix run github:MathisWellmann/agentica-mini-nixos`, which will fetch the git
         repo automatically and run it.

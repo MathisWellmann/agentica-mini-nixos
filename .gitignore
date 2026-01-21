@@ -7,7 +7,7 @@ cache.sqlite
 **/*.gitignore.*
 
 # Nix build artifact symlink
-result
+/result
 # Nix VM volume
 agentica.qcow2
 /.direnv
