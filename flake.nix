@@ -34,8 +34,9 @@
           uv
           ruff
         ];
-        other_tools = [
+        other_tools = with pkgs; [
           hongdown.packages.${system}.hongdown # Markdown formatter, will soon be upstream in nixpkgs <https://github.com/NixOS/nixpkgs/pull/478761>
+          taplo # `toml` formatter
         ];
       in {
         # Build packages with `nix build .#inference` for example.
