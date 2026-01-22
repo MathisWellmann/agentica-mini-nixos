@@ -5,7 +5,7 @@ requires-python = ">=3.13"
 [[package]]
 name = "agentica"
 version = "0.1.0"
-source = { editable = "../../symbolica/agentica-mini" }
+source = { editable = "../../../symbolica/agentica-mini" }
 dependencies = [
     { name = "aiohttp" },
     { name = "aiosqlite" },
@@ -42,7 +42,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentica", editable = "../../symbolica/agentica-mini" }]
+requires-dist = [{ name = "agentica", editable = "../../../symbolica/agentica-mini" }]
 
 [package.metadata.requires-dev]
 dev = [{ name = "pyright", specifier = ">=1.1.403" }]
