@@ -49,7 +49,14 @@
             shellHook = ''
               export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
               export NIX_SSL_CERT_FILE="$SSL_CERT_FILE"
+              unset PYTHONPATH
+              export REPO_ROOT=$(git rev-parse --show-toplevel)
             '';
+            env = {
+              UV_NO_SYNC = "1";
+              UV_PYTHON = pkgs.python313.interpreter;
+              UV_PYTHON_DOWNLOADS = "never";
+            };
           };
         };
 

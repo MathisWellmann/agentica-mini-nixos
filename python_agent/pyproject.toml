@@ -2,6 +2,7 @@
 name = "agentica-mini-nixos"
 version = "0.1.0"
 description = "Using agentica to control a full Linux NixOS VM"
+requires-python = ">=3.13"
 dependencies = [
     "agentica",
 ]
@@ -12,4 +13,3 @@ dev = ["pyright>=1.1.403"]
 [tool.uv.sources]
 # agentica = { git = "https://github.com/symbolica-ai/agentica-mini" }
 agentica = { path = "/home/m/symbolica/agentica-mini", editable = true }
-

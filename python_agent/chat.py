@@ -1,18 +1,3 @@
-"""
-Example output:
-
-➜  ~/repos/situ/prototypes/simple-situ git:(charlie/simple-situ) ✗ uv run python -m chat
-Send empty message to end the chat.
-User: Hello!
-Agent: Hello! I'm ready to assist you.
-User: What is the time?
-Agent: 2025-08-06 12:35:29
-User: What is the 32nd power of 3?
-Agent: 1853020188851841
-User:
-➜  ~/repos/situ/prototypes/simple-situ git:(charlie/simple-situ) ✗
-"""
-
 import asyncio
 
 import dotenv
@@ -28,9 +13,6 @@ GREEN = "\033[92m"
 PURPLE = "\033[95m"
 RESET = "\033[0m"
 GREY = "\033[90m"
-
-# Spawn a sub agent, and get it to work out the 32nd power of 3
-
 
 async def chat():
     print("Send empty message to end the chat.")
