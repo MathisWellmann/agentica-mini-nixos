@@ -38,6 +38,8 @@ All required build dependencies are packaged reproducibly and defined in
 `flake.nix`. A development shell is included and can be accessed by running
 `nix develop` or use `direnv allow` if available.
 
+To run the QEMU VM, simply run `nix-build nix/agentica_vm.nix; result/bin/run-agentica-vm`
+
 [Nix]: https://nixos.org/
 
 ### TODOs:

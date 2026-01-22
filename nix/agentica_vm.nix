@@ -48,8 +48,8 @@ let
         ];
         sharedDirectories = {
           share = {
-            source = "${toString ./../hostshare}";
-            target = "/mnt/shared";
+            source = "${toString ./../python_agent}";
+            target = "/root";
           };
         };
       };
