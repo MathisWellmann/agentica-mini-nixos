@@ -1,5 +1,13 @@
 # Build and run with `nix-build nix/agentica_vm.nix; result/bin/run-agentica-vm`
 # The jupyter notebook will be available on `127.0.0.1:8888` on the host.
+#
+# Some trouble shooting steps (TODO: don't run into any of these issues):
+# - If you do `uv run python -m chat`, but get the error "Failed to canonicalize path /root/.venv/bin/python3: Too many levels of symbolic links"
+#   Then These steps help:
+#   rm -rf .venv
+#   uv venv --python $(which python3)
+#   uv run python -m chat
+
 let
   pkgs = import <nixpkgs> {};
 

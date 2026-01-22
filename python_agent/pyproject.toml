@@ -12,4 +12,4 @@ dev = ["pyright>=1.1.403"]
 
 [tool.uv.sources]
 # agentica = { git = "https://github.com/symbolica-ai/agentica-mini" }
-agentica = { path = "/home/m/symbolica/agentica-mini", editable = true }
+agentica = { path = "./agentica-mini", editable = true }
