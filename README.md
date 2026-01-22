@@ -38,9 +38,15 @@ All required build dependencies are packaged reproducibly and defined in
 `flake.nix`. A development shell is included and can be accessed by running
 `nix develop` or use `direnv allow` if available.
 
-To run the QEMU VM, simply run `nix-build nix/agentica_vm.nix; result/bin/run-agentica-vm`
-
 [Nix]: https://nixos.org/
+
+### Agentica Agents in VM
+
+To run the QEMU VM, simply run
+`nix-build nix/agentica_vm.nix; result/bin/run-agentica-vm` The agentica agents
+will have full access to the `python_agent` directory and run as `root` user in
+the VM. They can modify the existing NixOS config and upgrade the system to
+autonomously enable services that it requires.
 
 ### TODOs:
 

@@ -14,35 +14,45 @@ let
 
     services = {
       getty.autologinUser = "root";
-      jupyter = {
-        enable = true;
-        inherit port;
-        ip = "0.0.0.0";
-        # Disable both token and password.
-        password = "";
-        command = "jupyter notebook --NotebookApp.token='' --NotebookApp.password='' ";
-      };
+      # jupyter = {
+      #   enable = true;
+      #   inherit port;
+      #   ip = "0.0.0.0";
+      #   # Disable both token and password.
+      #   password = "";
+      #   command = "jupyter notebook --NotebookApp.token='' --NotebookApp.password='' ";
+      # };
     };
+    programs.nix-ld.enable = true; # Enables running dynamically linked libraries like uv
     networking = {
       hostName = "agentica";
-      firewall.allowedTCPPorts = [port];
-      interfaces.eth0.ipv4.addresses = [
-        {
-          address = "192.168.0.124";
-          prefixLength = 24;
-        }
-      ];
+      # firewall.allowedTCPPorts = [port];
+      # interfaces.eth0.ipv4.addresses = [
+      #   {
+      #     address = "192.168.0.124";
+      #     prefixLength = 24;
+      #   }
+      # ];
     };
-    environment.systemPackages = with pkgs; [
-      uv
-      neofetch
-      ripgrep
-    ];
+    environment = {
+      systemPackages = with pkgs; [
+        # (python3.withPackages (python-pkgs: with python-pkgs; [
+        #   numpy
+        # ]))
+        python3
+        uv
+        neofetch
+        ripgrep
+      ];
+      variables = {
+        PYTHONPATH="${pkgs.python3}";
+      };
+    };
     virtualisation = {
       diskSize = 2048;
-      # This enables port forwarding
       vmVariant.virtualisation = {
         qemu.options = [
+          # This enables port forwarding
           "-netdev"
           "user,id=net0,hostfwd=tcp::${toString port}-:${toString port}"
         ];
