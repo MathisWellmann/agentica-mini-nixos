@@ -18,9 +18,20 @@ let
       loader.systemd-boot.enable = true;
       loader.efi.canTouchEfiVariables = true;
       initrd.systemd.enable = true;
+      # Allow QEMU to use its parent TTY when launched from the command line with -nographic
+      kernelParams = [
+        "console=tty1"
+        "console=ttyS0,115200"
+      ];
     };
 
+    # Enable Nix inside the VM
+    nix = {
+      package = pkgs.nix;
+      settings.experimental-features = [ "nix-command" "flakes" ];
+    };
     services = {
+      # nix-daemon.enable = true;
       getty.autologinUser = "root";
       # jupyter = {
       #   enable = true;
@@ -44,13 +55,15 @@ let
     };
     environment = {
       systemPackages = with pkgs; [
-        # (python3.withPackages (python-pkgs: with python-pkgs; [
-        #   numpy
-        # ]))
         python3
         uv
         neofetch
         ripgrep
+        zellij
+        tmux
+        fzf
+        skim # `sk` command
+        nix
       ];
       variables = {
         PYTHONPATH="${pkgs.python3}";
@@ -63,6 +76,8 @@ let
           # This enables port forwarding
           "-netdev"
           "user,id=net0,hostfwd=tcp::${toString port}-:${toString port}"
+          # Don't spawn a separate window, but use the host console. Needs to combine with `kernelParams` above.
+          "-nographic"
         ];
         sharedDirectories = {
           share = {
